@@ -1,0 +1,64 @@
+# Enhanced Experiment Configurations
+
+# Configuration for multiple models and datasets
+configs:
+  - name: "logistic_synthetic"
+    dataset: "synthetic"
+    model_type: "logistic"
+    n_samples: 1000
+    n_features: 20
+    n_clients: 10
+    rounds: 10
+    local_epochs: 1
+    batch_size: 64
+    learning_rate: 0.05
+    shap_samples: 10
+    trust_alpha: 0.4
+    trust_beta: 0.3
+    trust_gamma: 0.3
+  
+  - name: "logistic_breast_cancer"
+    dataset: "breast_cancer"
+    model_type: "logistic"
+    n_clients: 10
+    rounds: 10
+    local_epochs: 1
+    shap_samples: 10
+    trust_alpha: 0.4
+    trust_beta: 0.3
+    trust_gamma: 0.3
+  
+  - name: "mlp_synthetic"
+    dataset: "synthetic"
+    model_type: "mlp"
+    n_samples: 1000
+    n_features: 20
+    n_clients: 10
+    rounds: 10
+    local_epochs: 1
+    shap_samples: 10
+    trust_alpha: 0.4
+    trust_beta: 0.3
+    trust_gamma: 0.3
+  
+  - name: "mlp_breast_cancer"
+    dataset: "breast_cancer"
+    model_type: "mlp"
+    n_clients: 10
+    rounds: 10
+    local_epochs: 1
+    shap_samples: 10
+    trust_alpha: 0.4
+    trust_beta: 0.3
+    trust_gamma: 0.3
+  
+  - name: "rf_breast_cancer"
+    dataset: "breast_cancer"
+    model_type: "rf"
+    n_clients: 10
+    rounds: 10
+    local_epochs: 1
+    shap_samples: 10
+    trust_alpha: 0.4
+    trust_beta: 0.3
+    trust_gamma: 0.3

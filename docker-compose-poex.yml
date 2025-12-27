@@ -1,0 +1,243 @@
+services:
+  # Hyperledger Fabric network
+  orderer.example.com:
+    image: hyperledger/fabric-orderer:2.5
+    container_name: poex-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=INFO
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_LISTENPORT=7050
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      - ORDERER_GENERAL_BOOTSTRAPMETHOD=file
+      - ORDERER_GENERAL_BOOTSTRAPFILE=/var/hyperledger/orderer/genesis.block
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_CHANNELPARTICIPATION_ENABLED=false
+    volumes:
+      - ./hlf/crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp:/var/hyperledger/orderer/msp
+      - ./hlf/crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/tls:/var/hyperledger/orderer/tls
+      - ./hlf/channel-artifacts/genesis.block:/var/hyperledger/orderer/genesis.block
+      - poex-orderer-data:/var/hyperledger/production/orderer
+    ports:
+      - "7050:7050"
+    networks:
+      - poex
+
+  peer0.org1.example.com:
+    image: hyperledger/fabric-peer:2.5
+    container_name: poex-peer0-org1
+    environment:
+      - FABRIC_LOGGING_SPEC=INFO
+      - DOCKER_API_VERSION=1.44
+      - CORE_PEER_ID=peer0.org1.example.com
+      - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.org1.example.com:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=poex
+      - CORE_LEDGER_STATE_STATEDATABASE=goleveldb
+      # Gossip and discovery configuration for single-peer setup
+      - CORE_PEER_GOSSIP_USELEADERELECTION=false
+      - CORE_PEER_GOSSIP_ORGLEADER=true
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
+      # Enable discovery service with proper configuration
+      - CORE_PEER_DISCOVERY_ENABLED=true
+      - CORE_PEER_DISCOVERY_ORGMEMBERSALLOWEDACCESS=true
+      # Gateway endorsement fix for single org
+      - CORE_PEER_GATEWAY_ENABLED=true
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ./hlf/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/etc/hyperledger/fabric/msp
+      - ./hlf/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls:/etc/hyperledger/fabric/tls
+      - poex-peer0-org1-data:/var/hyperledger/production
+    ports:
+      - "7051:7051"
+    networks:
+      - poex
+
+  cli:
+    image: hyperledger/fabric-tools:2.5
+    container_name: poex-cli
+    tty: true
+    stdin_open: true
+    environment:
+      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_ROOTCERT_FILE=/fabric/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/fabric/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+    working_dir: /fabric
+    volumes:
+      - ./hlf:/fabric
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - poex
+
+  poex-chaincode:
+    build:
+      context: ./hlf/chaincode/poex/javascript
+      dockerfile: Dockerfile
+    container_name: poex-chaincode
+    depends_on:
+      - peer0.org1.example.com
+    environment:
+      - CHAINCODE_SERVER_ADDRESS=0.0.0.0:9999
+      - CHAINCODE_ID=${CHAINCODE_ID:-}
+    networks:
+      - poex
+
+  poex-gateway:
+    build:
+      context: ./hlf/gateway
+      dockerfile: Dockerfile
+    container_name: poex-gateway
+    depends_on:
+      - peer0.org1.example.com
+    environment:
+      - PORT=8080
+      - CHANNEL_NAME=${CHANNEL_NAME:-poexchannel}
+      - CHAINCODE_NAME=${CHAINCODE_NAME:-poex}
+      - MSP_ID=Org1MSP
+      - CRYPTO_BASE=/fabric/crypto-config
+      - PEER_ENDPOINT=peer0.org1.example.com:7051
+      - PEER_TLS_HOSTNAME_OVERRIDE=peer0.org1.example.com
+    volumes:
+      - ./hlf/crypto-config:/fabric/crypto-config:ro
+    ports:
+      - "8080:8080"
+    networks:
+      - poex
+
+  # FL components
+  aggregator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: poex-aggregator
+    depends_on:
+      - poex-gateway
+    environment:
+      - PYTHONUNBUFFERED=1
+      - NODE_TYPE=aggregator
+      - N_CLIENTS=${N_CLIENTS:-3}
+      - MAX_ROUNDS=${MAX_ROUNDS:-10}
+      - AGG_METHOD=${AGG_METHOD:-fedavg}
+      - POEX_ENABLED=${POEX_ENABLED:-1}
+      - POEX_THRESHOLD=${POEX_THRESHOLD:-0.5}
+      - POEX_GATEWAY_URL=http://poex-gateway:8080
+      - RUN_ID=${RUN_ID:-1}
+      - CLEAR_RESULTS=${CLEAR_RESULTS:-0}
+      - ATTACK_TYPE=${ATTACK_TYPE:-none}
+      - MALICIOUS_RATIO=${MALICIOUS_RATIO:-0}
+      - MALICIOUS_CLIENTS=${MALICIOUS_CLIENTS:-}
+      - SEED=${SEED:-42}
+    ports:
+      - "5001:5000"
+    networks:
+      - poex
+    volumes:
+      - ./results:/app/results
+      - ./configs:/app/configs
+      - ./scripts:/app/scripts
+    command: python scripts/run_poex_distributed_aggregator.py
+
+  client_0:
+    profiles: ["clients"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: poex-client-0
+    depends_on:
+      - aggregator
+    environment:
+      - PYTHONUNBUFFERED=1
+      - NODE_TYPE=client
+      - NODE_ID=0
+      - AGGREGATOR_URL=http://aggregator:5000
+      - LOCAL_EPOCHS=${LOCAL_EPOCHS:-1}
+      - SHAP_SAMPLES=${SHAP_SAMPLES:-10}
+      - SEED=${SEED:-42}
+      - ATTACK_TYPE=${ATTACK_TYPE:-none}
+      - ATTACK_SIGMA=${ATTACK_SIGMA:-0.1}
+      - MALICIOUS_RATIO=${MALICIOUS_RATIO:-0}
+      - MALICIOUS_CLIENTS=${MALICIOUS_CLIENTS:-}
+      - MALICIOUS=${CLIENT_0_MALICIOUS:-0}
+    networks:
+      - poex
+    volumes:
+      - ./configs:/app/configs
+    command: python scripts/run_distributed_client.py
+
+  client_1:
+    profiles: ["clients"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: poex-client-1
+    depends_on:
+      - aggregator
+    environment:
+      - PYTHONUNBUFFERED=1
+      - NODE_TYPE=client
+      - NODE_ID=1
+      - AGGREGATOR_URL=http://aggregator:5000
+      - LOCAL_EPOCHS=${LOCAL_EPOCHS:-1}
+      - SHAP_SAMPLES=${SHAP_SAMPLES:-10}
+      - SEED=${SEED:-42}
+      - ATTACK_TYPE=${ATTACK_TYPE:-none}
+      - ATTACK_SIGMA=${ATTACK_SIGMA:-0.1}
+      - MALICIOUS_RATIO=${MALICIOUS_RATIO:-0}
+      - MALICIOUS_CLIENTS=${MALICIOUS_CLIENTS:-}
+      - MALICIOUS=${CLIENT_1_MALICIOUS:-0}
+    networks:
+      - poex
+    volumes:
+      - ./configs:/app/configs
+    command: python scripts/run_distributed_client.py
+
+  client_2:
+    profiles: ["clients"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: poex-client-2
+    depends_on:
+      - aggregator
+    environment:
+      - PYTHONUNBUFFERED=1
+      - NODE_TYPE=client
+      - NODE_ID=2
+      - AGGREGATOR_URL=http://aggregator:5000
+      - LOCAL_EPOCHS=${LOCAL_EPOCHS:-1}
+      - SHAP_SAMPLES=${SHAP_SAMPLES:-10}
+      - SEED=${SEED:-42}
+      - ATTACK_TYPE=${ATTACK_TYPE:-none}
+      - ATTACK_SIGMA=${ATTACK_SIGMA:-0.1}
+      - MALICIOUS_RATIO=${MALICIOUS_RATIO:-0}
+      - MALICIOUS_CLIENTS=${MALICIOUS_CLIENTS:-}
+      - MALICIOUS=${CLIENT_2_MALICIOUS:-0}
+    networks:
+      - poex
+    volumes:
+      - ./configs:/app/configs
+    command: python scripts/run_distributed_client.py
+
+networks:
+  poex:
+    name: poex
+
+volumes:
+  poex-orderer-data:
+  poex-peer0-org1-data:

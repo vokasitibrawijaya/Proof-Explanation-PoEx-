@@ -1,0 +1,116 @@
+{
+  "attack_success_rates": {
+    "poex_sign_flip": {
+      "attack": "sign_flip",
+      "method": "PoEx Enabled",
+      "total_submitted": 9,
+      "accepted": 3,
+      "rejected": 6,
+      "asr": 33.33,
+      "defense_success": 66.67
+    },
+    "baseline_sign_flip": {
+      "attack": "sign_flip",
+      "method": "Baseline (No PoEx)",
+      "total_submitted": 15,
+      "accepted": 15,
+      "rejected": 0,
+      "asr": 100.0,
+      "defense_success": 0.0
+    },
+    "poex_label_flip": {
+      "attack": "label_flip",
+      "method": "PoEx Enabled",
+      "total_submitted": 9,
+      "accepted": 0,
+      "rejected": 9,
+      "asr": 0.0,
+      "defense_success": 100.0
+    },
+    "poex_gaussian_noise": {
+      "attack": "gaussian_noise",
+      "method": "PoEx Enabled",
+      "total_submitted": 9,
+      "accepted": 0,
+      "rejected": 9,
+      "asr": 0.0,
+      "defense_success": 100.0
+    }
+  },
+  "performance_metrics": {
+    "sign_flip_baseline": {
+      "attack": "sign_flip",
+      "method": "Baseline",
+      "initial_acc": 0.6,
+      "final_acc": 0.585,
+      "avg_acc": 0.597,
+      "std_acc": 0.0067,
+      "final_f1": 0.6937,
+      "degradation": 1.5
+    },
+    "sign_flip_poex_enabled": {
+      "attack": "sign_flip",
+      "method": "PoEx Enabled",
+      "initial_acc": 0.725,
+      "final_acc": 0.705,
+      "avg_acc": 0.7183,
+      "std_acc": 0.0115,
+      "final_f1": 0.6911,
+      "degradation": 2.0
+    },
+    "label_flip_poex_enabled": {
+      "attack": "label_flip",
+      "method": "PoEx Enabled",
+      "initial_acc": 0.685,
+      "final_acc": 0.685,
+      "avg_acc": 0.685,
+      "std_acc": 0.0,
+      "final_f1": 0.6957,
+      "degradation": 0.0
+    },
+    "gaussian_noise_poex_enabled": {
+      "attack": "gaussian_noise",
+      "method": "PoEx Enabled",
+      "initial_acc": 0.685,
+      "final_acc": 0.685,
+      "avg_acc": 0.685,
+      "std_acc": 0.0,
+      "final_f1": 0.6957,
+      "degradation": 0.0
+    }
+  },
+  "overhead_analysis": {
+    "sign_flip": {
+      "attack": "sign_flip",
+      "poex_avg_latency_ms": 6062.3,
+      "poex_max_latency_ms": 6736.92,
+      "poex_min_latency_ms": 4718.89,
+      "baseline_latency_ms": 0.0,
+      "overhead_ms": 6062.3,
+      "overhead_percent": 0
+    },
+    "label_flip": {
+      "attack": "label_flip",
+      "poex_avg_latency_ms": 5410.56,
+      "poex_max_latency_ms": 6736.71,
+      "poex_min_latency_ms": 2768.27
+    },
+    "gaussian_noise": {
+      "attack": "gaussian_noise",
+      "poex_avg_latency_ms": 4978.51,
+      "poex_max_latency_ms": 6714.46,
+      "poex_min_latency_ms": 2053.62
+    }
+  },
+  "statistical_tests": {
+    "sign_flip": {
+      "attack": "sign_flip",
+      "poex_mean": 0.7183,
+      "baseline_mean": 0.597,
+      "t_statistic": 19.2559,
+      "p_value": 0.0,
+      "significant": "Yes",
+      "effect_size": 0.1213
+    }
+  }
+}

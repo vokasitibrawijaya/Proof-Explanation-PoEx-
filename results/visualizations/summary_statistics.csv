@@ -1,0 +1,3 @@
+Method,Attack,Final Accuracy,Final Precision,Final Recall,Final F1,Avg NSDS,Accepted,Rejected,Avg Latency (ms)
+Proposed (PoEx ON),Label Flip,0.6850,0.6729,0.7200,0.6957,0.0000,0,9,5410.56
+Proposed (PoEx ON),Gaussian Noise,0.6850,0.6729,0.7200,0.6957,0.0000,0,9,4978.51

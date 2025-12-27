@@ -1,0 +1,35 @@
+# FedXChain Experiment Configuration
+# Based on ETASR paper specifications
+
+# Dataset configuration
+n_samples: 1000
+n_features: 20
+n_classes: 2
+
+# Federated learning parameters
+n_clients: 10
+rounds: 10
+local_epochs: 1
+batch_size: 64
+learning_rate: 0.05
+
+# Non-IID data distribution
+dirichlet_alpha: 0.5  # Lower values = more non-IID
+
+# Explainability parameters
+shap_samples: 10  # Number of samples for SHAP computation
+
+# Trust score weights (alpha + beta + gamma should = 1.0)
+trust_alpha: 0.4  # Accuracy weight
+trust_beta: 0.3   # XAI fidelity weight
+trust_gamma: 0.3  # Consistency weight
+
+# Blockchain configuration
+use_blockchain: false  # Set to true when blockchain is available
+blockchain_rpc: "http://localhost:8545"
+contract_address: ""  # Will be filled after deployment
+
+# Output configuration
+output_dir: "results"
+save_models: true
+verbose: true

@@ -1,0 +1,171 @@
+version: '3.8'
+
+services:
+  # Blockchain node (Hardhat local node)
+  blockchain:
+    build:
+      context: ./hardhat
+      dockerfile: Dockerfile
+    container_name: fedxchain-blockchain-gpu
+    ports:
+      - "8545:8545"
+    networks:
+      - fedxchain-network-gpu
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8545"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - blockchain-data-gpu:/app/artifacts
+
+  # Contract deployer
+  deployer:
+    build:
+      context: ./hardhat
+      dockerfile: Dockerfile
+    container_name: fedxchain-deployer-gpu
+    depends_on:
+      blockchain:
+        condition: service_healthy
+    environment:
+      - BLOCKCHAIN_RPC=http://blockchain:8545
+    networks:
+      - fedxchain-network-gpu
+    volumes:
+      - contract-data-gpu:/app/deployments
+    command: >
+      sh -c "npx hardhat run scripts/deploy.js --network localhost"
+
+  # Aggregator server (coordinates FL rounds) - CPU only
+  aggregator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fedxchain-aggregator-gpu
+    depends_on:
+      deployer:
+        condition: service_completed_successfully
+    environment:
+      - BLOCKCHAIN_RPC=http://blockchain:8545
+      - NODE_TYPE=aggregator
+      - N_CLIENTS=5
+    ports:
+      - "5000:5000"
+    networks:
+      - fedxchain-network-gpu
+    volumes:
+      - ./results:/app/results
+      - ./logs:/app/logs
+      - ./configs:/app/configs
+      - contract-data-gpu:/app/deployments
+    command: python scripts/run_distributed_aggregator.py
+
+  # FL Client nodes with GPU support
+  client_gpu_0:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    container_name: fedxchain-client-gpu-0
+    depends_on:
+      - aggregator
+    environment:
+      - BLOCKCHAIN_RPC=http://blockchain:8545
+      - NODE_TYPE=client
+      - NODE_ID=0
+      - AGGREGATOR_URL=http://aggregator:5000
+      - CUDA_VISIBLE_DEVICES=-1
+    networks:
+      - fedxchain-network-gpu
+    volumes:
+      - ./results:/app/results
+      - ./logs:/app/logs
+      - contract-data-gpu:/app/deployments
+
+  client_gpu_1:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    container_name: fedxchain-client-gpu-1
+    depends_on:
+      - aggregator
+    environment:
+      - BLOCKCHAIN_RPC=http://blockchain:8545
+      - NODE_TYPE=client
+      - NODE_ID=1
+      - AGGREGATOR_URL=http://aggregator:5000
+      - CUDA_VISIBLE_DEVICES=-1
+    networks:
+      - fedxchain-network-gpu
+    volumes:
+      - ./results:/app/results
+      - ./logs:/app/logs
+      - contract-data-gpu:/app/deployments
+
+  client_gpu_2:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    container_name: fedxchain-client-gpu-2
+    depends_on:
+      - aggregator
+    environment:
+      - BLOCKCHAIN_RPC=http://blockchain:8545
+      - NODE_TYPE=client
+      - NODE_ID=2
+      - AGGREGATOR_URL=http://aggregator:5000
+      - CUDA_VISIBLE_DEVICES=-1
+    networks:
+      - fedxchain-network-gpu
+    volumes:
+      - ./results:/app/results
+      - ./logs:/app/logs
+      - contract-data-gpu:/app/deployments
+
+  client_gpu_3:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    container_name: fedxchain-client-gpu-3
+    depends_on:
+      - aggregator
+    environment:
+      - BLOCKCHAIN_RPC=http://blockchain:8545
+      - NODE_TYPE=client
+      - NODE_ID=3
+      - AGGREGATOR_URL=http://aggregator:5000
+      - CUDA_VISIBLE_DEVICES=-1
+    networks:
+      - fedxchain-network-gpu
+    volumes:
+      - ./results:/app/results
+      - ./logs:/app/logs
+      - contract-data-gpu:/app/deployments
+
+  client_gpu_4:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    container_name: fedxchain-client-gpu-4
+    depends_on:
+      - aggregator
+    environment:
+      - BLOCKCHAIN_RPC=http://blockchain:8545
+      - NODE_TYPE=client
+      - NODE_ID=4
+      - AGGREGATOR_URL=http://aggregator:5000
+      - CUDA_VISIBLE_DEVICES=-1
+    networks:
+      - fedxchain-network-gpu
+    volumes:
+      - ./results:/app/results
+      - ./logs:/app/logs
+      - contract-data-gpu:/app/deployments
+
+networks:
+  fedxchain-network-gpu:
+    driver: bridge
+
+volumes:
+  blockchain-data-gpu:
+  contract-data-gpu:

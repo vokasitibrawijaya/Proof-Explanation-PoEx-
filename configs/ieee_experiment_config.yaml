@@ -1,0 +1,216 @@
+# IEEE Access Compliant Experimental Configuration
+# Comprehensive experimental design for rigorous evaluation
+
+# ============================================================================
+# Dataset Configurations
+# ============================================================================
+datasets:
+  synthetic:
+    n_samples: 1000
+    n_features: 20
+    n_classes: 2
+    n_informative: 14  # 70% of features
+    n_redundant: 4     # 20% of features
+    test_size: 0.2
+  
+  breast_cancer:
+    # Uses sklearn.datasets.load_breast_cancer()
+    test_size: 0.2
+
+# ============================================================================
+# Federated Learning Architecture
+# ============================================================================
+federated_learning:
+  n_clients: 10
+  rounds: 20
+  local_epochs: 1
+  batch_size: 32
+  
+  # Non-IID data distribution
+  data_distribution:
+    type: 'dirichlet'
+    alpha: 0.5  # Lower = more heterogeneous
+    min_samples_per_client: 10
+
+# ============================================================================
+# Experimental Methods (Baseline vs Proposed)
+# ============================================================================
+methods:
+  fedavg:
+    name: 'FedAvg (Baseline)'
+    description: 'Standard Federated Averaging without explainability'
+    aggregation: 'weighted_average'
+    
+  fedxchain:
+    name: 'FedXChain (Proposed)'
+    description: 'Federated Explainable Blockchain with PoEx'
+    aggregation: 'trust_weighted'
+    explainability:
+      method: 'SHAP'
+      n_samples: 10
+    trust_mechanism:
+      alpha: 0.4  # Accuracy weight
+      beta: 0.3   # XAI fidelity weight
+      gamma: 0.3  # Consistency weight
+
+# ============================================================================
+# Attack Scenarios for Security Evaluation
+# ============================================================================
+attack_scenarios:
+  # Scenario 1: No Attack (Baseline)
+  no_attack:
+    malicious_nodes: []
+    attack_type: 'none'
+    attack_intensity: 0.0
+  
+  # Scenario 2: Label Flipping Attack (Low Intensity)
+  label_flip_low:
+    malicious_nodes: [0, 1]  # 20% malicious
+    attack_type: 'label_flip'
+    attack_intensity: 0.3
+    description: 'Flip 30% of training labels'
+  
+  # Scenario 3: Label Flipping Attack (High Intensity)
+  label_flip_high:
+    malicious_nodes: [0, 1, 2]  # 30% malicious
+    attack_type: 'label_flip'
+    attack_intensity: 0.5
+    description: 'Flip 50% of training labels'
+  
+  # Scenario 4: Gaussian Noise Attack (Low Intensity)
+  gaussian_noise_low:
+    malicious_nodes: [0, 1]
+    attack_type: 'gaussian_noise'
+    attack_intensity: 0.3
+    description: 'Add Gaussian noise (σ=0.3) to model weights'
+  
+  # Scenario 5: Gaussian Noise Attack (High Intensity)
+  gaussian_noise_high:
+    malicious_nodes: [0, 1, 2]
+    attack_type: 'gaussian_noise'
+    attack_intensity: 0.5
+    description: 'Add Gaussian noise (σ=0.5) to model weights'
+  
+  # Scenario 6: Sign Flipping Attack
+  sign_flip:
+    malicious_nodes: [0, 1]
+    attack_type: 'sign_flip'
+    attack_intensity: 1.0
+    description: 'Flip sign of all model weights'
+
+# ============================================================================
+# Statistical Validation Parameters
+# ============================================================================
+statistical_analysis:
+  n_runs: 10  # Number of independent runs per configuration
+  confidence_level: 0.95
+  random_seeds: [42, 123, 456, 789, 101112, 131415, 161718, 192021, 222324, 252627]
+  
+  # Metrics to compute
+  metrics:
+    - accuracy
+    - precision
+    - recall
+    - f1_score
+    - asr  # Attack Success Rate (for attack scenarios)
+  
+  # Statistical tests
+  tests:
+    - 'paired_t_test'  # Compare FedAvg vs FedXChain
+    - 'anova'          # Compare across multiple attack scenarios
+    - 'mann_whitney'   # Non-parametric alternative
+
+# ============================================================================
+# Performance Metrics
+# ============================================================================
+evaluation_metrics:
+  model_performance:
+    - accuracy
+    - precision
+    - recall
+    - f1_score
+    - auc_roc
+  
+  robustness_metrics:
+    - attack_success_rate
+    - accuracy_degradation
+    - false_positive_rate
+    - false_negative_rate
+  
+  explainability_metrics:
+    - nsds  # Node-Specific Divergence Score
+    - shap_consistency
+    - explanation_fidelity
+  
+  efficiency_metrics:
+    - training_time_per_round
+    - communication_cost
+    - computational_overhead
+
+# ============================================================================
+# Ablation Study Configuration
+# ============================================================================
+ablation_study:
+  # Study 1: Impact of trust weights
+  trust_weights:
+    - {alpha: 1.0, beta: 0.0, gamma: 0.0}  # Accuracy only
+    - {alpha: 0.0, beta: 1.0, gamma: 0.0}  # XAI only
+    - {alpha: 0.0, beta: 0.0, gamma: 1.0}  # Consistency only
+    - {alpha: 0.4, beta: 0.3, gamma: 0.3}  # Balanced (default)
+  
+  # Study 2: Number of malicious nodes
+  malicious_ratios:
+    - 0.1   # 1 out of 10
+    - 0.2   # 2 out of 10
+    - 0.3   # 3 out of 10
+    - 0.4   # 4 out of 10
+  
+  # Study 3: SHAP sample size
+  shap_samples:
+    - 5
+    - 10
+    - 20
+    - 50
+
+# ============================================================================
+# Output Configuration
+# ============================================================================
+output:
+  directory: 'results_ieee'
+  save_format: ['csv', 'json']
+  
+  # Plots to generate
+  plots:
+    - 'accuracy_vs_rounds'
+    - 'attack_comparison'
+    - 'trust_score_evolution'
+    - 'nsds_distribution'
+    - 'ablation_results'
+    - 'statistical_comparison'
+  
+  # LaTeX table generation
+  latex_tables:
+    - 'performance_comparison'
+    - 'attack_resilience'
+    - 'ablation_study'
+    - 'statistical_tests'
+
+# ============================================================================
+# Reproducibility Settings
+# ============================================================================
+reproducibility:
+  set_seed: true
+  seed: 42
+  deterministic: true
+  log_environment: true
+  save_config: true
+  save_checkpoints: false
+
+# ============================================================================
+# Computational Resources
+# ============================================================================
+resources:
+  use_gpu: false
+  n_workers: 4
+  memory_limit: '16GB'
+  timeout_per_experiment: 3600  # 1 hour in seconds

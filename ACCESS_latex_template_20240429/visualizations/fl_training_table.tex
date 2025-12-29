@@ -1,0 +1,18 @@
+
+% Real FL Training Results
+\begin{table}[h]
+\centering
+\caption{Real Federated Learning Training Results (MNIST, 20\% Byzantine)}
+\label{tab:fl_results}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Aggregation} & \textbf{Accuracy} & \textbf{Loss} & \textbf{Convergence} \\
+\hline
+MEAN & 12.24\% $\pm$ 1.19\% & 2.3006 $\pm$ 0.0027 & 0\% \\
+MEDIAN & 11.98\% $\pm$ 0.45\% & 2.3008 $\pm$ 0.0029 & 0\% \\
+TRIMMED MEAN & 11.98\% $\pm$ 0.45\% & 2.3006 $\pm$ 0.0027 & 0\% \\
+\hline
+\end{tabular}
+\\[0.3cm]
+\small Averaged across 3 seeds (42, 43, 44). "Convergence" di sini berarti accuracy $> 15\%$ (di atas random 10\%). Pada eksperimen ini, akurasi hanya sedikit di atas random dan belum mencapai konvergensi penuh.
+\end{table}

@@ -56,9 +56,11 @@
 Federated learning (FL) enables collaborative model training across distributed clients while preserving data privacy. However, the decentralized nature of FL introduces critical security vulnerabilities, particularly Byzantine attacks where malicious clients submit poisoned model updates to degrade global model performance. Existing defense mechanisms often lack transparency and interpretability in their detection criteria. This paper proposes \textbf{FedXChain}, a novel blockchain-based federated learning framework that introduces \textbf{Proof of Explanation (PoEx)}---a consensus mechanism leveraging SHAP (SHapley Additive exPlanations) values to provide \textbf{interpretable and auditable} model update validation. PoEx computes the Normalized Symmetric Divergence Score (NSDS) using Jensen-Shannon divergence between client SHAP explanations and a reference baseline. We conduct comprehensive experiments with \textbf{20 clients over 15 FL rounds} across \textbf{5 random seeds} on both IID and \textbf{Non-IID data distributions} (Dirichlet $\alpha=0.5$), evaluating four attack types including \textbf{adaptive attacks}. We compare PoEx against six state-of-the-art Byzantine-robust methods: Krum, MultiKrum, TrimmedMean, Bulyan, FLTrust, and FLAME. Results demonstrate that under IID conditions with 30\% Byzantine attackers, PoEx achieves \textbf{97.19\% $\pm$ 0.35\%} accuracy with low variance, comparable to TrimmedMean. \textbf{Notably, PoEx excels under Non-IID adaptive attack scenarios}, achieving \textbf{95.96\% $\pm$ 1.63\%} accuracy, significantly outperforming FLAME (86.67\% $\pm$ 8.76\%) and FLTrust (84.21\% $\pm$ 9.88\%). However, we transparently acknowledge that on small tabular datasets, NSDS-based per-client filtering shows modest discriminative power (Breast Cancer: honest NSDS=0.091, Byzantine NSDS=0.154, $\Delta\mu=0.063$, $p<10^{-148}$), while on complex models (CIFAR-10 CNN: $\Delta\mu=0.416$, TPR=97.8\%, FPR=0\%) PoEx achieves excellent detection. The key contribution of PoEx lies in providing \textbf{interpretable defense decisions} and \textbf{immutable audit trails} via blockchain---capabilities unavailable in existing methods---while maintaining competitive accuracy.
 \end{abstract}
 
-\par\noindent\textbf{Keywords:} Blockchain, Byzantine-robust aggregation, explainable AI, federated learning, Hyperledger Fabric, model poisoning, Proof of Explanation, SHAP, trust management\par
+\begin{keywords}
+Blockchain, Byzantine-robust aggregation, explainable AI, federated learning, Hyperledger Fabric, model poisoning, Proof of Explanation, SHAP, trust management
+\end{keywords}
 
-
+\titlepgskip=-21pt
 
 \maketitle
 
@@ -67,7 +69,7 @@ Federated learning (FL) enables collaborative model training across distributed 
 \label{sec:introduction}
 %==============================================================================
 
-\textbf{F}ederated learning (FL) has emerged as a transformative paradigm for training machine learning models across distributed devices while preserving data privacy~\cite{mcmahan2017communication,kairouz2021advances}. Unlike traditional centralized learning approaches that require aggregating raw data at a central server, FL enables multiple clients to collaboratively train a shared global model by exchanging only model updates (gradients or weights), keeping sensitive data localized on client devices. This privacy-preserving property has driven FL adoption in sensitive domains including healthcare~\cite{xu2021federated,passerat2020blockchain,liu2023blockchain}, financial services, mobile applications~\cite{kang2020reliable}, and Internet of Things (IoT) networks~\cite{ranathunga2023blockchain}.
+\PARstart{F}{ederated} learning (FL) has emerged as a transformative paradigm for training machine learning models across distributed devices while preserving data privacy~\cite{mcmahan2017communication,kairouz2021advances}. Unlike traditional centralized learning approaches that require aggregating raw data at a central server, FL enables multiple clients to collaboratively train a shared global model by exchanging only model updates (gradients or weights), keeping sensitive data localized on client devices. This privacy-preserving property has driven FL adoption in sensitive domains including healthcare~\cite{xu2021federated,passerat2020blockchain,liu2023blockchain}, financial services, mobile applications~\cite{kang2020reliable}, and Internet of Things (IoT) networks~\cite{ranathunga2023blockchain}.
 
 However, the decentralized and collaborative nature of federated learning introduces critical security vulnerabilities. \textbf{Byzantine attacks}---where malicious or compromised clients submit arbitrary or poisoned model updates---pose significant threats to the integrity and performance of the global model~\cite{blanchard2017machine,yin2018byzantine,cao2024comprehensive,dong2023defending,kalapaaking2023blockchain}. These attacks can take various forms, including:
 
@@ -301,34 +303,34 @@ where $\tau$ is a configurable threshold. In our experiments, we use $\tau = 0.5
 
 \subsubsection{Algorithm}
 
-Algorithm~1 presents the complete PoEx validation procedure.
+Algorithm~\ref{alg:poex} presents the complete PoEx validation procedure.
 
+\begin{algorithm}[t]
+\caption{Proof of Explanation (PoEx) Consensus}
+\label{alg:poex}
+\begin{algorithmic}[1]
+\REQUIRE Client updates $\{\Delta \mathbf{w}_i\}_{i=1}^{N}$, SHAP vectors $\{\mathbf{\Phi}_i\}_{i=1}^{N}$, threshold $\tau$
+\ENSURE Aggregated model update $\Delta \mathbf{w}_{agg}$, validation decisions
 
-\vspace{0.5em}
-\par\noindent\rule{\linewidth}{0.5pt}
-\par\noindent\textbf{Algorithm 1} Proof of Explanation (PoEx) Consensus
-\par\noindent\rule{\linewidth}{0.5pt}
-\par\noindent \textbf{Require:} Client updates $\{\Delta \mathbf{w}_i\}_{i=1}^{N}$, SHAP vectors $\{\mathbf{\Phi}_i\}_{i=1}^{N}$, threshold $\tau$
-\par\noindent \textbf{Ensure:} Aggregated model update $\Delta \mathbf{w}_{agg}$, validation decisions
-\par\noindent 1: \hspace{0.0em}Initialize reference $\mathbf{\Phi}_{ref}$ from trusted baseline (see Section~\ref{sec:ref_init})
-\par\noindent 2: \hspace{0.0em}$\mathcal{A} \leftarrow \emptyset$
-\par\noindent 3: \hspace{0.0em}\textbf{for} each client $i = 1, \ldots, N$ \textbf{do}
-\par\noindent 4: \hspace{1.5em}Compute $\text{NSDS}_i \leftarrow \text{NSDS}(\mathbf{\Phi}_i, \mathbf{\Phi}_{ref})$
-\par\noindent 5: \hspace{1.5em}\textbf{if} $\text{NSDS \textbf{then}
-\par\noindent 6: \hspace{3.0em}$\mathcal{A} \leftarrow \mathcal{A} \cup \{i\}$
-\par\noindent 7: \hspace{3.0em}Record \texttt{ACCEPTED} on blockchain
-\par\noindent 8: \hspace{3.0em}Update trust score: $T_i \leftarrow T_i + \delta$
-\par\noindent 9: \hspace{1.5em}\textbf{else}
-\par\noindent 10: \hspace{3.0em}Record \texttt{REJECTED} on blockchain with $\text{NSDS}_i$
-\par\noindent 11: \hspace{3.0em}Update trust score: $T_i \leftarrow T_i - \delta$
-\par\noindent 12: \hspace{1.5em}\textbf{end if}
-\par\noindent 13: \hspace{0.0em}\textbf{end for}
-\par\noindent 14: \hspace{0.0em}$\Delta \mathbf{w}_{agg} \leftarrow \frac{1}{|\mathcal{A}|} \sum_{i \in \mathcal{A}} \Delta \mathbf{w}_i$
-\par\noindent 15: \hspace{0.0em}\textbf{return} $\Delta \mathbf{w}_{agg}$, validation decisions
-\par\noindent\rule{\linewidth}{0.5pt}
-\vspace{0.5em}
+\STATE Initialize reference $\mathbf{\Phi}_{ref}$ from trusted baseline (see Section~\ref{sec:ref_init})
+\STATE $\mathcal{A} \leftarrow \emptyset$ \COMMENT{Accepted clients}
 
+\FOR{each client $i = 1, \ldots, N$}
+    \STATE Compute $\text{NSDS}_i \leftarrow \text{NSDS}(\mathbf{\Phi}_i, \mathbf{\Phi}_{ref})$
+    \IF{$\text{NSDS}_i < \tau$}
+        \STATE $\mathcal{A} \leftarrow \mathcal{A} \cup \{i\}$
+        \STATE Record \texttt{ACCEPTED} on blockchain
+        \STATE Update trust score: $T_i \leftarrow T_i + \delta$
+    \ELSE
+        \STATE Record \texttt{REJECTED} on blockchain with $\text{NSDS}_i$
+        \STATE Update trust score: $T_i \leftarrow T_i - \delta$
+    \ENDIF
+\ENDFOR
 
+\STATE $\Delta \mathbf{w}_{agg} \leftarrow \frac{1}{|\mathcal{A}|} \sum_{i \in \mathcal{A}} \Delta \mathbf{w}_i$
+\RETURN $\Delta \mathbf{w}_{agg}$, validation decisions
+\end{algorithmic}
+\end{algorithm}
 
 \subsubsection{Reference Baseline Initialization}
 \label{sec:ref_init}
@@ -357,7 +359,10 @@ FedXChain utilizes Hyperledger Fabric for:
 Each client maintains a trust score $T_i \in [0, 1]$ initialized to 0.5. After each round:
 
 \begin{equation}
-T_i^{(t+1)} = \left\{\begin{array}{ll} \min(T_i^{(t)} + \delta, 1) & if accepted \\ \max(T_i^{(t)} - \delta, 0) & if rejected \end{array}\right.
+T_i^{(t+1)} = \begin{cases}
+\min(T_i^{(t)} + \delta, 1) & \text{if accepted} \\
+\max(T_i^{(t)} - \delta, 0) & \text{if rejected}
+\end{cases}
 \label{eq:trust_update}
 \end{equation}
 
@@ -454,40 +459,42 @@ We evaluate four attack types with increasing sophistication:
     \item \textbf{Sign Flipping:} Model weights multiplied by $-1$
     \item \textbf{Label Flipping:} Binary labels inverted ($0 \rightarrow 1$, $1 \rightarrow 0$)
     \item \textbf{Gaussian Noise:} $\mathcal{N}(0, 0.1)$ noise added to weights
-    \item \textbf{Adaptive Attack:} Adversary with knowledge of defense threshold $\tau$ crafts updates to maximize damage while staying below detection, following~\cite{cao2024comprehensive}. Algorithm~2 presents the formal procedure.
+    \item \textbf{Adaptive Attack:} Adversary with knowledge of defense threshold $\tau$ crafts updates to maximize damage while staying below detection, following~\cite{cao2024comprehensive}. Algorithm~\ref{alg:adaptive} presents the formal procedure.
 \end{enumerate}
 
+\begin{algorithm}[t]
+\caption{Adaptive Attack Against PoEx}
+\label{alg:adaptive}
+\begin{algorithmic}[1]
+\REQUIRE Threshold $\tau$, honest update $\Delta \mathbf{w}^{honest}$, attack scale $s \in [1, 5]$
+\ENSURE Adversarial update $\Delta \mathbf{w}^{adv}$
 
-\vspace{0.5em}
-\par\noindent\rule{\linewidth}{0.5pt}
-\par\noindent\textbf{Algorithm 2} Adaptive Attack Against PoEx
-\par\noindent\rule{\linewidth}{0.5pt}
-\par\noindent \textbf{Require:} Threshold $\tau$, honest update $\Delta \mathbf{w}^{honest}$, attack scale $s \in [1, 5]$
-\par\noindent \textbf{Ensure:} Adversarial update $\Delta \mathbf{w}^{adv}$
-\par\noindent 1: \hspace{0.0em}\textbf{Phase 1: Reference Estimation}
-\par\noindent 2: \hspace{0.0em}Observe accepted updates from previous rounds
-\par\noindent 3: \hspace{0.0em}Estimate reference: $\hat{\mathbf{\Phi}}_{ref} \leftarrow \text{median}(\{\mathbf{\Phi}_j : j \in \mathcal{A}_{prev}\})$
-\par\noindent 4: \hspace{0.0em}\textbf{Phase 2: Constrained Attack Generation}
-\par\noindent 5: \hspace{0.0em}Initialize: $\Delta \mathbf{w}^{adv} \leftarrow -s \cdot \Delta \mathbf{w}^{honest}$
-\par\noindent 6: \hspace{0.0em}Compute: $\mathbf{\Phi}^{adv} \leftarrow \text{SHAP}(f_{local}^{adv})$
-\par\noindent 7: \hspace{0.0em}Compute: $\text{NSDS}_{adv} \leftarrow \text{NSDS}(\mathbf{\Phi}^{adv}, \hat{\mathbf{\Phi}}_{ref})$
-\par\noindent 8: \hspace{0.0em}\textbf{Phase 3: Adaptive Scaling}
-\par\noindent 9: \hspace{0.0em}\textbf{while} $\text{NSDS \textbf{do}
-\par\noindent 10: \hspace{1.5em}$s \leftarrow s \cdot 0.8$
-\par\noindent 11: \hspace{1.5em}$\Delta \mathbf{w}^{adv} \leftarrow -s \cdot \Delta \mathbf{w}^{honest}$
-\par\noindent 12: \hspace{1.5em}Recompute $\text{NSDS}_{adv}$
-\par\noindent 13: \hspace{0.0em}\textbf{end while}
-\par\noindent 14: \hspace{0.0em}\textbf{Phase 4: Feedback Loop}
-\par\noindent 15: \hspace{0.0em}\textbf{if} update was accepted in previous round \textbf{then}
-\par\noindent 16: \hspace{1.5em}$s \leftarrow \min(s \cdot 1.1, 5)$
-\par\noindent 17: \hspace{0.0em}\textbf{else}
-\par\noindent 18: \hspace{1.5em}$s \leftarrow s \cdot 0.9$
-\par\noindent 19: \hspace{0.0em}\textbf{end if}
-\par\noindent 20: \hspace{0.0em}\textbf{return} $\Delta \mathbf{w}^{adv}$
-\par\noindent\rule{\linewidth}{0.5pt}
-\vspace{0.5em}
+\STATE \textbf{Phase 1: Reference Estimation}
+\STATE Observe accepted updates from previous rounds
+\STATE Estimate reference: $\hat{\mathbf{\Phi}}_{ref} \leftarrow \text{median}(\{\mathbf{\Phi}_j : j \in \mathcal{A}_{prev}\})$
 
+\STATE \textbf{Phase 2: Constrained Attack Generation}
+\STATE Initialize: $\Delta \mathbf{w}^{adv} \leftarrow -s \cdot \Delta \mathbf{w}^{honest}$ \COMMENT{Sign-flip with scale}
+\STATE Compute: $\mathbf{\Phi}^{adv} \leftarrow \text{SHAP}(f_{local}^{adv})$
+\STATE Compute: $\text{NSDS}_{adv} \leftarrow \text{NSDS}(\mathbf{\Phi}^{adv}, \hat{\mathbf{\Phi}}_{ref})$
 
+\STATE \textbf{Phase 3: Adaptive Scaling}
+\WHILE{$\text{NSDS}_{adv} \geq \tau - 0.05$}
+    \STATE $s \leftarrow s \cdot 0.8$ \COMMENT{Reduce attack magnitude}
+    \STATE $\Delta \mathbf{w}^{adv} \leftarrow -s \cdot \Delta \mathbf{w}^{honest}$
+    \STATE Recompute $\text{NSDS}_{adv}$
+\ENDWHILE
+
+\STATE \textbf{Phase 4: Feedback Loop}
+\IF{update was accepted in previous round}
+    \STATE $s \leftarrow \min(s \cdot 1.1, 5)$ \COMMENT{Increase attack}
+\ELSE
+    \STATE $s \leftarrow s \cdot 0.9$ \COMMENT{Decrease attack}
+\ENDIF
+
+\RETURN $\Delta \mathbf{w}^{adv}$
+\end{algorithmic}
+\end{algorithm}
 
 The adaptive attack represents a strong adversary that: (1) estimates the reference SHAP vector from observed system behavior, (2) solves a constrained optimization to maximize attack damage while evading detection, and (3) adapts attack magnitude based on feedback. This tests PoEx's robustness under sophisticated threat models.
 
@@ -698,15 +705,16 @@ We now present a formal analysis of PoEx's Byzantine resilience guarantees.
     \item[\textbf{(A3)}] \textit{Bounded Attack:} Byzantine clients cannot simultaneously (a) evade detection ($\text{NSDS} < \tau$) and (b) produce maximally harmful updates.
 \end{itemize}
 
-\par\textbf{Theorem.} \textit{[PoEx Byzantine Resilience Bound]
+\begin{theorem}[PoEx Byzantine Resilience Bound]
 \label{thm:byzantine_bound}
 Under assumptions (A1)--(A3), let $n$ be the total number of clients, $f$ the number of Byzantine clients, and $\tau \in (0,1)$ the NSDS threshold. If Byzantine clients that evade detection (NSDS $< \tau$) produce updates with bounded attack magnitude $\|\Delta \mathbf{w}^{adv} - \Delta \mathbf{w}^{honest}\| \leq \epsilon(\tau)$ where $\epsilon(\tau)$ decreases as $\tau$ decreases, then PoEx maintains convergence to within $O(\epsilon(\tau) \cdot f/n)$ of the optimal model when:
 \begin{equation}
 f < \frac{n\tau}{1+\tau}
 \label{eq:byzantine_bound}
-\end{equation}}\par
+\end{equation}
+\end{theorem}
 
-\par\textbf{Proof.} [Proof Sketch]
+\begin{proof}[Proof Sketch]
 The proof proceeds in three steps:
 
 \textit{Step 1 (Detection vs. Evasion Trade-off):} By (A3), a Byzantine client faces a fundamental trade-off: producing highly damaging updates (large gradient deviation) results in divergent SHAP patterns (high NSDS), while evading detection (low NSDS) constrains attack magnitude. Let $\mathcal{B}_{det} \subseteq \mathcal{B}$ be detected Byzantines and $\mathcal{B}_{eva} = \mathcal{B} \setminus \mathcal{B}_{det}$ be evaders.
@@ -717,7 +725,8 @@ The proof proceeds in three steps:
 \end{equation}
 where $\mathcal{A}$ is the set of accepted clients. Since $|\mathcal{A}| \geq n - f$ (all honest accepted by A1) and $|\mathcal{B}_{eva}| \leq f$, the error is bounded by $\frac{f}{n-f} \cdot \epsilon(\tau)$.
 
-\textit{Step 3 (Threshold-Tolerance Relationship):} For the aggregation to remain robust, we require honest contributions to dominate: $n - f > f \cdot c(\tau)$ where $c(\tau) = \tau/(1-\tau)$ captures the detection efficiency. Rearranging yields $f < n\tau/(1+\tau)$. $\square$\par
+\textit{Step 3 (Threshold-Tolerance Relationship):} For the aggregation to remain robust, we require honest contributions to dominate: $n - f > f \cdot c(\tau)$ where $c(\tau) = \tau/(1-\tau)$ captures the detection efficiency. Rearranging yields $f < n\tau/(1+\tau)$.
+\end{proof}
 
 \textbf{Remark 1 (Comparison with Existing Bounds):} Unlike Krum's bound $f < (n-3)/2$ which assumes geometric separability of Byzantine updates, our bound explicitly incorporates the threshold parameter $\tau$, providing practitioners a tunable trade-off between tolerance and sensitivity.
 
@@ -1126,29 +1135,29 @@ The authors would like to thank the Laboratory of Internet of Things \& Human Ce
 % AUTHOR BIOGRAPHIES
 %==============================================================================
 
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{author_ieee/moko.png}}]{Rachmad Andri Atmoko}
+received the B.App.Sc.\ degree in automation engineering and the M.Eng.\ degree in instrumentation engineering from the Institut Teknologi Sepuluh Nopember (ITS), Surabaya, Indonesia, in 2013 and 2015, respectively. He is currently a Lecturer with the Faculty of Vocational Studies, Universitas Brawijaya, Malang, Indonesia. His research interests include federated learning, blockchain technology, cybersecurity, the Internet of Things (IoT), and explainable AI (XAI).
+\end{IEEEbiography}
 
-\par\vspace{0.5em}\textbf{Rachmad Andri Atmoko} received the B.App.Sc.\ degree in automation engineering and the M.Eng.\ degree in instrumentation engineering from the Institut Teknologi Sepuluh Nopember (ITS), Surabaya, Indonesia, in 2013 and 2015, respectively. He is currently a Lecturer with the Faculty of Vocational Studies, Universitas Brawijaya, Malang, Indonesia. His research interests include federated learning, blockchain technology, cybersecurity, the Internet of Things (IoT), and explainable AI (XAI).\par\vspace{0.5em}
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{author_ieee/sholeh.png}}]{Sholeh Hadi Pramono}
+was born in 1958. He received the bachelor's degree in electrical power system from Universitas Brawijaya, Indonesia, in 1985, and the master's degree in opto-electro techniques and the Ph.D.\ degree in laser application from Universitas Indonesia, in 1990 and 2009, respectively. Since 1986, he has been a Lecturer with Universitas Brawijaya. He currently holds the esteemed position of Professor with the Faculty of Engineering, Universitas Brawijaya. His major research interests include optical communication, photovoltaic, and artificial intelligence.
+\end{IEEEbiography}
 
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{author_ieee/fauzan.png}}]{M. Fauzan Edy Purnomo}
+received the B.E.\ and M.E.\ degrees in electrical engineering from Universitas Brawijaya, Malang, Indonesia, and the Ph.D.\ degree in electrical and electronic engineering from the University of Miyazaki, Miyazaki, Japan. He is currently a Lecturer and Researcher with the Department of Electrical Engineering, Faculty of Engineering, Universitas Brawijaya. His research interests include antenna theory and design, microwave engineering, electromagnetic wave propagation, wireless sensor networks (WSN), and wireless power transfer.
+\end{IEEEbiography}
 
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{author_ieee/panca.png}}]{Panca Mudjirahardjo}
+received the B.Eng.\ degree in electrical engineering from Universitas Brawijaya, Indonesia, in 1995, the M.Eng.\ degree in electrical engineering from Universitas Gadjah Mada, Indonesia, in 2001, and the Dr.Eng.\ degree in control engineering from the Machine Intelligence Laboratory, Kyushu Institute of Technology, Japan, in 2015. Since 2002, he has been a Faculty Member with the Department of Electrical Engineering, Universitas Brawijaya, where he currently holds the position of an Associate Professor. His current research interests include digital and analog instrumentation system design, pattern recognition, image processing, and computer vision.
+\end{IEEEbiography}
 
-\par\vspace{0.5em}\textbf{Sholeh Hadi Pramono} was born in 1958. He received the bachelor's degree in electrical power system from Universitas Brawijaya, Indonesia, in 1985, and the master's degree in opto-electro techniques and the Ph.D.\ degree in laser application from Universitas Indonesia, in 1990 and 2009, respectively. Since 1986, he has been a Lecturer with Universitas Brawijaya. He currently holds the esteemed position of Professor with the Faculty of Engineering, Universitas Brawijaya. His major research interests include optical communication, photovoltaic, and artificial intelligence.\par\vspace{0.5em}
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{author_ieee/mahdin.png}}]{Mahdin Rohmatillah}
+received the B.Eng.\ degree in electrical engineering from Universitas Brawijaya, Malang, Indonesia, in 2016, the M.Sc.\ degree in electrical engineering from National Sun Yat-sen University, Kaohsiung, Taiwan, in 2018, and the Ph.D.\ degree from National Yang Ming Chiao Tung University, Taiwan, in 2024. Currently, he is a Lecturer with Universitas Brawijaya. His research interests include machine learning, deep reinforcement learning, and dialogue systems.
+\end{IEEEbiography}
 
-
-
-\par\vspace{0.5em}\textbf{M. Fauzan Edy Purnomo} received the B.E.\ and M.E.\ degrees in electrical engineering from Universitas Brawijaya, Malang, Indonesia, and the Ph.D.\ degree in electrical and electronic engineering from the University of Miyazaki, Miyazaki, Japan. He is currently a Lecturer and Researcher with the Department of Electrical Engineering, Faculty of Engineering, Universitas Brawijaya. His research interests include antenna theory and design, microwave engineering, electromagnetic wave propagation, wireless sensor networks (WSN), and wireless power transfer.\par\vspace{0.5em}
-
-
-
-\par\vspace{0.5em}\textbf{Panca Mudjirahardjo} received the B.Eng.\ degree in electrical engineering from Universitas Brawijaya, Indonesia, in 1995, the M.Eng.\ degree in electrical engineering from Universitas Gadjah Mada, Indonesia, in 2001, and the Dr.Eng.\ degree in control engineering from the Machine Intelligence Laboratory, Kyushu Institute of Technology, Japan, in 2015. Since 2002, he has been a Faculty Member with the Department of Electrical Engineering, Universitas Brawijaya, where he currently holds the position of an Associate Professor. His current research interests include digital and analog instrumentation system design, pattern recognition, image processing, and computer vision.\par\vspace{0.5em}
-
-
-
-\par\vspace{0.5em}\textbf{Mahdin Rohmatillah} received the B.Eng.\ degree in electrical engineering from Universitas Brawijaya, Malang, Indonesia, in 2016, the M.Sc.\ degree in electrical engineering from National Sun Yat-sen University, Kaohsiung, Taiwan, in 2018, and the Ph.D.\ degree from National Yang Ming Chiao Tung University, Taiwan, in 2024. Currently, he is a Lecturer with Universitas Brawijaya. His research interests include machine learning, deep reinforcement learning, and dialogue systems.\par\vspace{0.5em}
-
-
-
-\par\vspace{0.5em}\textbf{Cries Avian} received the bachelor's and master's degrees in electrical engineering from Universitas Jember, Indonesia, in 2016 and 2020, respectively, and the Ph.D.\ degree in electronic and computer engineering from the National Taiwan University of Science and Technology, in 2024. He is currently affiliated with the Department of Electrical Engineering, Universitas Brawijaya, Indonesia. His professional experience includes working as a Machine Learning Engineer with AAEON, Taiwan, where he focused on deep learning model optimization and embedded AI systems. His research interests span embedded computing, biomedical signal and image processing, artificial intelligence, and intelligent control systems.\par\vspace{0.5em}
-
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{author_ieee/cries.png}}]{Cries Avian}
+received the bachelor's and master's degrees in electrical engineering from Universitas Jember, Indonesia, in 2016 and 2020, respectively, and the Ph.D.\ degree in electronic and computer engineering from the National Taiwan University of Science and Technology, in 2024. He is currently affiliated with the Department of Electrical Engineering, Universitas Brawijaya, Indonesia. His professional experience includes working as a Machine Learning Engineer with AAEON, Taiwan, where he focused on deep learning model optimization and embedded AI systems. His research interests span embedded computing, biomedical signal and image processing, artificial intelligence, and intelligent control systems.
+\end{IEEEbiography}
 
 %==============================================================================
 % REFERENCES
@@ -1270,6 +1279,6 @@ C.~Molnar, \emph{Interpretable Machine Learning: A Guide for Making Black Box Mo
 
 \end{thebibliography}
 
-
+\EOD
 
 \end{document}

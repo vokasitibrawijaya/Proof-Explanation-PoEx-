@@ -33,20 +33,25 @@
 
 \title{FedXChain: Proof of Explanation (PoEx) Consensus for Byzantine-Robust Federated Learning Using SHAP-Based Model Validation on Blockchain}
 
-\author{\uppercase{First Author}\authorrefmark{1},
-\uppercase{Second Author}\authorrefmark{2},
+\author{\uppercase{Andri Frindito}\authorrefmark{1},
+\uppercase{Mohd Haris Lye Abdullah}\authorrefmark{2},
+\uppercase{Sholeh Hadi Pramono}\authorrefmark{1},
+\uppercase{Mochammad Hannats Hanafi Ichsan}\authorrefmark{1},
+\uppercase{Panca Mudjirahardjo}\authorrefmark{1},
+\uppercase{Fauzan Arrofiqi}\authorrefmark{3},
 \IEEEmembership{Member, IEEE}}
 
-\address[1]{Department of Computer Science, University Name, City, Country (e-mail: author1@university.edu)}
-\address[2]{Department of Electrical Engineering, University Name, City, Country (e-mail: author2@university.edu)}
+\address[1]{Department of Electrical Engineering, Universitas Brawijaya, Malang 65145, Indonesia (e-mail: andrifrnd@student.ub.ac.id, sholehpramono@ub.ac.id, mhannats@ub.ac.id, panca@ub.ac.id)}
+\address[2]{Department of Computer Engineering, Universiti Teknikal Malaysia Melaka, Melaka 76100, Malaysia (e-mail: haris@utem.edu.my)}
+\address[3]{Department of Computer Science, Universitas Siber Asia, Jakarta 12550, Indonesia (e-mail: fauzan@unsia.ac.id)}
 
-\tfootnote{This work was supported by [Your Funding Agency/Grant Number].}
+\tfootnote{This work was supported by the Directorate of Research, Technology and Community Service, Ministry of Education, Culture, Research and Technology, Republic of Indonesia.}
 
 \markboth
-{Author \headeretal: FedXChain: Proof of Explanation Consensus for Byzantine-Robust Federated Learning}
-{Author \headeretal: FedXChain: Proof of Explanation Consensus for Byzantine-Robust Federated Learning}
+{Frindito \headeretal: FedXChain: Proof of Explanation Consensus for Byzantine-Robust Federated Learning}
+{Frindito \headeretal: FedXChain: Proof of Explanation Consensus for Byzantine-Robust Federated Learning}
 
-\corresp{Corresponding author: First Author (e-mail: author1@university.edu).}
+\corresp{Corresponding author: Andri Frindito (e-mail: andrifrnd@student.ub.ac.id).}
 
 \begin{abstract}
 Federated learning (FL) enables collaborative model training across distributed clients while preserving data privacy. However, the decentralized nature of FL introduces critical security vulnerabilities, particularly Byzantine attacks where malicious clients submit poisoned model updates to degrade global model performance. Existing defense mechanisms often lack transparency and interpretability in their detection criteria. This paper proposes \textbf{FedXChain}, a novel blockchain-based federated learning framework that introduces \textbf{Proof of Explanation (PoEx)}---a consensus mechanism leveraging SHAP (SHapley Additive exPlanations) values to validate model updates through explainable AI. PoEx computes the Normalized Symmetric Divergence Score (NSDS) between client SHAP explanations and a reference baseline, rejecting updates that exceed a configurable threshold. We implement FedXChain on Hyperledger Fabric and evaluate it against three attack types: Sign Flipping, Label Flipping, and Gaussian Noise injection. Experimental results demonstrate that PoEx achieves \textbf{88.89\% average defense success rate} compared to 0\% for baseline FedAvg, with \textbf{100\% rejection rate} for Label Flipping and Gaussian Noise attacks. Under Sign Flipping attacks, PoEx maintains \textbf{71.83\% accuracy} compared to 59.70\% for undefended baseline, representing a \textbf{20.32\% improvement} with statistical significance ($p < 0.0001$). The computational overhead averages \textbf{5.48 seconds per round}, which is acceptable for practical FL deployments. Our results prove that explainable AI-based consensus mechanisms can provide robust, transparent, and interpretable defense against model poisoning attacks in federated learning systems.
@@ -677,6 +682,20 @@ Our comprehensive evaluation demonstrates:
 FedXChain represents a significant step toward trustworthy federated learning systems where defense decisions are not only effective but also explainable and auditable. The integration of explainable AI with blockchain technology creates a foundation for next-generation secure, transparent, and accountable distributed machine learning.
 
 %==============================================================================
+\section*{Data Availability Statement}
+%==============================================================================
+
+The source code, experimental scripts, configuration files, and experimental results supporting this research are publicly available at: \url{https://github.com/vokasitibrawijaya/Proof-Explanation-PoEx-}. The repository includes:
+\begin{itemize}
+    \item Python scripts for running all experiments (\texttt{scripts/})
+    \item Configuration files for different experimental scenarios (\texttt{configs/})
+    \item Experimental results including figures and statistical analyses (\texttt{results/})
+    \item Docker configuration for reproducible environment setup
+    \item Hyperledger Fabric chaincode implementation (\texttt{hlf/})
+    \item Smart contract implementation (\texttt{hardhat/})
+\end{itemize}
+
+%==============================================================================
 % REFERENCES
 %==============================================================================
 
@@ -740,14 +759,28 @@ M.~Wang, K.~Zheng, Y.~Yang, and X.~Wang, ``An explainable machine learning frame
 % AUTHOR BIOGRAPHIES
 %==============================================================================
 
-\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{author1.png}}]{First Author}
-received the B.S. and M.S. degrees in computer science from University Name, Country, in 20XX and 20XX, respectively. He is currently pursuing the Ph.D. degree with the Department of Computer Science, University Name. His research interests include federated learning, blockchain technology, and explainable AI.
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{../author_ieee/cries.png}}]{Andri Frindito}
+received the B.S. degree in informatics engineering from Universitas 17 Agustus 1945 Surabaya, Indonesia, in 2008, and the M.S. degree in electrical engineering from Institut Teknologi Sepuluh Nopember, Surabaya, Indonesia, in 2014. He is currently pursuing the Ph.D. degree with the Department of Electrical Engineering, Universitas Brawijaya, Malang, Indonesia. His research interests include federated learning, blockchain technology, explainable AI, and distributed systems security.
 \end{IEEEbiography}
 
-\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{author2.png}}]{Second Author}
-(Member, IEEE) received the Ph.D. degree in electrical engineering from University Name, Country, in 20XX. She is currently an Associate Professor with the Department of Electrical Engineering, University Name. Her research interests include distributed systems, machine learning security, and privacy-preserving computation.
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{../author_ieee/mahdin.png}}]{Mohd Haris Lye Abdullah}
+received the Ph.D. degree in computer science from Universiti Kebangsaan Malaysia in 2015. He is currently a Senior Lecturer with the Department of Computer Engineering, Universiti Teknikal Malaysia Melaka. His research interests include computer networks, network security, and distributed computing.
 \end{IEEEbiography}
 
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{../author_ieee/sholeh.png}}]{Sholeh Hadi Pramono}
+received the Ph.D. degree in electrical engineering. He is currently a Professor with the Department of Electrical Engineering, Universitas Brawijaya, Malang, Indonesia. His research interests include optical communication, signal processing, and intelligent systems.
 \end{IEEEbiography}
-\EOD
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{../author_ieee/moko.png}}]{Mochammad Hannats Hanafi Ichsan}
+received the Ph.D. degree in computer science. He is currently a Lecturer with the Department of Electrical Engineering, Universitas Brawijaya, Malang, Indonesia. His research interests include Internet of Things, embedded systems, and machine learning.
+\end{IEEEbiography}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{../author_ieee/panca.png}}]{Panca Mudjirahardjo}
+received the Ph.D. degree in electrical engineering. He is currently a Lecturer with the Department of Electrical Engineering, Universitas Brawijaya, Malang, Indonesia. His research interests include computer vision, pattern recognition, and artificial intelligence.
+\end{IEEEbiography}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{../author_ieee/fauzan.png}}]{Fauzan Arrofiqi}
+received the M.S. degree in computer science. He is currently a Lecturer with the Department of Computer Science, Universitas Siber Asia, Jakarta, Indonesia. His research interests include cybersecurity, blockchain technology, and network security.
+\end{IEEEbiography}
+
 \end{document}

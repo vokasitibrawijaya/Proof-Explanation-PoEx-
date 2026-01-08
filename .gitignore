@@ -1,3 +1,6 @@
+# Trash folder - not for GitHub
+trash/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -53,6 +56,7 @@ poex_direct.*
 paper_convert.*
 poex_processed*
 preprocess_latex_v*.py
+*.rtf
 
 # Office temp files
 ~$*

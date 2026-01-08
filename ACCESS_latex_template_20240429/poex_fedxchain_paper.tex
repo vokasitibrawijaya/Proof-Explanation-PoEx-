@@ -5,6 +5,7 @@
 \usepackage{algorithmic}
 \usepackage{algorithm}
 \usepackage{graphicx}
+\graphicspath{{figure/}}
 \usepackage{textcomp}
 \usepackage{xcolor}
 \usepackage{multirow}
@@ -868,14 +869,14 @@ Byzantine & 0.594 & 0.107 \\
 
 \begin{figure}[t!]
     \centering
-    \includegraphics[width=\columnwidth]{visualizations/cifar10_nsds_distribution.png}
+    \includegraphics[width=\columnwidth]{nsds_distribution.png}
     \caption{\textbf{NSDS Distribution: CIFAR-10 CNN.} Distribution of NSDS scores for honest vs. Byzantine clients on CIFAR-10 CNN experiment. Byzantine clients show significantly higher NSDS ($\mu=0.594$) compared to honest clients ($\mu=0.178$), with clear separation enabling effective detection at threshold $\tau=0.4$.}
     \label{fig:nsds_dist}
 \end{figure}
 
 \begin{figure}[t!]
     \centering
-    \includegraphics[width=\columnwidth]{visualizations/cifar10_tpr_fpr_curve.png}
+    \includegraphics[width=\columnwidth]{tpr_fpr_curve.png}
     \caption{\textbf{CIFAR-10 CNN: TPR/FPR vs Threshold.} True Positive Rate and False Positive Rate across different NSDS thresholds. Optimal threshold $\tau=0.4$ achieves F1=0.989 with TPR=97.8\% and FPR=0\%.}
     \label{fig:cifar10_tpr_fpr}
 \end{figure}

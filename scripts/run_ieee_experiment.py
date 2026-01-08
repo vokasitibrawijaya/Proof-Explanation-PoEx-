@@ -1,11 +1,52 @@
 #!/usr/bin/env python3
 """
-IEEE Access Compliant Experimental Framework for FedXChain
-Implements rigorous experimental methodology with:
-- Baseline vs Proposed comparison
-- Attack scenarios (Label Flipping, Gaussian Noise)
-- Multiple runs for statistical significance
-- Comprehensive metrics and statistical analysis
+=============================================================================
+FedXChain: Proof of Explanation (PoEx) Consensus - IEEE Access Experiment
+=============================================================================
+
+This script implements the comprehensive experimental framework for the paper:
+"FedXChain: Proof of Explanation (PoEx) Consensus for Byzantine-Robust 
+Federated Learning Using SHAP-Based Model Validation on Blockchain"
+
+REPRODUCIBILITY GUIDE:
+----------------------
+1. Environment Setup:
+   - Python 3.10+ required
+   - Install dependencies: pip install -r requirements.txt
+   - Or use Docker: docker-compose up
+
+2. Running Experiments:
+   - Basic: python scripts/run_ieee_experiment.py
+   - With config: python scripts/run_ieee_experiment.py --config configs/ieee_experiment_config.yaml
+   - Output directory: python scripts/run_ieee_experiment.py --output results_ieee
+
+3. Key Parameters (in configs/ieee_experiment_config.yaml):
+   - n_clients: Number of federated learning clients (default: 20)
+   - rounds: Number of FL communication rounds (default: 15)
+   - dirichlet_alpha: Non-IID data distribution parameter (0.5 for Non-IID)
+   - n_runs: Number of random seeds for statistical significance (default: 5)
+
+4. Attack Scenarios:
+   - no_attack: Baseline without malicious clients
+   - label_flip: Label flipping attack (30% intensity)
+   - gaussian_noise: Gaussian noise injection
+   - sign_flip: Sign flipping attack
+   - adaptive: Adaptive attack combining multiple strategies
+
+5. Aggregation Methods Compared:
+   - FedAvg: Standard federated averaging (baseline)
+   - Krum: Byzantine-robust single selection
+   - MultiKrum: Byzantine-robust multi-selection
+   - TrimmedMean: Coordinate-wise trimmed mean
+   - Bulyan: Combines Krum with trimmed mean
+   - FLTrust: Server-side trust bootstrapping
+   - FLAME: Clustering-based defense
+   - PoEx: Our proposed SHAP-based defense
+
+Author: Rachmad Andri Atmoko et al.
+Affiliation: Universitas Brawijaya
+License: Research and Educational Use
+=============================================================================
 """
 
 import numpy as np
@@ -30,7 +71,19 @@ from datetime import datetime
 
 
 def _deep_update(base: dict, updates: dict) -> dict:
-    """Recursively merge updates into base and return base."""
+    """
+    Recursively merge updates dictionary into base dictionary.
+    
+    This utility function is used for merging configuration overrides
+    while preserving nested structure.
+    
+    Args:
+        base: Base dictionary to update
+        updates: Dictionary with values to merge into base
+        
+    Returns:
+        Updated base dictionary
+    """
     for k, v in (updates or {}).items():
         if isinstance(v, dict) and isinstance(base.get(k), dict):
             _deep_update(base[k], v)
@@ -40,7 +93,25 @@ def _deep_update(base: dict, updates: dict) -> dict:
 
 
 def load_ieee_config(config_path: Path) -> dict:
-    """Load IEEE config YAML and normalize to a flat runtime config."""
+    """
+    Load and parse IEEE experiment configuration from YAML file.
+    
+    This function reads the experiment configuration and normalizes it
+    into a flat runtime configuration for easier access during experiments.
+    
+    Args:
+        config_path: Path to the YAML configuration file
+        
+    Returns:
+        Dictionary containing all experiment parameters
+        
+    Configuration Structure:
+        - datasets: Dataset configurations (synthetic, breast_cancer)
+        - federated_learning: FL parameters (n_clients, rounds, etc.)
+        - attack_scenarios: Byzantine attack configurations
+        - statistical_analysis: Random seeds and confidence levels
+        - reproducibility: Seed settings and logging options
+    """
     with open(config_path, 'r', encoding='utf-8') as f:
         raw = yaml.safe_load(f)
 
@@ -86,7 +157,22 @@ def load_ieee_config(config_path: Path) -> dict:
 
 
 def log_environment(output_dir: Path) -> None:
-    """Persist minimal environment metadata for reproducibility."""
+    """
+    Log environment information for reproducibility.
+    
+    This function captures and saves the runtime environment details including
+    Python version, platform info, and package versions. This is essential
+    for reproducing results in different environments.
+    
+    Args:
+        output_dir: Directory where environment.json will be saved
+        
+    Output File (environment.json):
+        - timestamp: When the experiment was run
+        - python: Python version string
+        - platform: OS and architecture info
+        - packages: Dictionary of package names and versions
+    """
     try:
         from importlib import metadata as importlib_metadata
     except Exception:
@@ -111,10 +197,50 @@ def log_environment(output_dir: Path) -> None:
     with open(output_dir / 'environment.json', 'w', encoding='utf-8') as f:
         json.dump(env, f, indent=2)
 
+
+# =============================================================================
+# FEDERATED LEARNING NODE CLASS
+# =============================================================================
+
 class FedLearningNode:
-    """Federated Learning Node with optional attack capability"""
+    """
+    Federated Learning Node with optional Byzantine attack capability.
+    
+    This class represents a single client/node in the federated learning system.
+    Each node maintains its own local dataset and model, and can optionally
+    behave as a malicious (Byzantine) node implementing various attack strategies.
+    
+    Attributes:
+        node_id (int): Unique identifier for this node
+        X_train, y_train: Local training data
+        X_test, y_test: Local test data
+        is_malicious (bool): Whether this node is a Byzantine attacker
+        attack_type (str): Type of attack ('label_flip', 'gaussian_noise', 'sign_flip')
+        attack_intensity (float): Strength of the attack (0.0 to 1.0)
+        model: Local SGDClassifier model
+        trust_score (float): Current trust score assigned to this node
+        
+    Attack Types:
+        - label_flip: Flips a portion of training labels before local training
+        - gaussian_noise: Adds Gaussian noise to model weights after training
+        - sign_flip: Inverts the sign of all model weights
+        - adaptive: Combines multiple attack strategies (for advanced evaluation)
+    """
     
     def __init__(self, node_id, X_train, y_train, X_test, y_test, is_malicious=False, attack_type=None, attack_intensity=0.3):
+        """
+        Initialize a federated learning node.
+        
+        Args:
+            node_id: Unique identifier for this node
+            X_train: Training features (numpy array)
+            y_train: Training labels (numpy array)
+            X_test: Test features (numpy array)
+            y_test: Test labels (numpy array)
+            is_malicious: Whether this node performs attacks
+            attack_type: Type of Byzantine attack to perform
+            attack_intensity: Strength of attack (0.0-1.0)
+        """
         self.node_id = node_id
         self.X_train = X_train
         self.y_train = y_train
@@ -123,20 +249,38 @@ class FedLearningNode:
         self.is_malicious = is_malicious
         self.attack_type = attack_type
         self.attack_intensity = attack_intensity
+        # Initialize local model with fixed random state for reproducibility
         self.model = SGDClassifier(loss='log_loss', max_iter=100, random_state=42)
         self.trust_score = 1.0
         
     def apply_attack(self, weights):
-        """Apply attack to model weights"""
+        """
+        Apply Byzantine attack to model weights.
+        
+        This method implements various attack strategies that malicious clients
+        can use to poison the federated learning process.
+        
+        Args:
+            weights: Dictionary containing 'coef' and 'intercept' arrays
+            
+        Returns:
+            Modified weights dictionary (or original if node is honest)
+            
+        Attack Implementations:
+            - label_flip: Applied during training, not here
+            - gaussian_noise: w' = w + N(0, intensity)
+            - sign_flip: w' = -w
+        """
         if not self.is_malicious or self.attack_type is None:
             return weights
             
         if self.attack_type == 'label_flip':
-            # Label flipping attack - already applied during training
+            # Label flipping attack - already applied during training phase
             return weights
             
         elif self.attack_type == 'gaussian_noise':
-            # Add Gaussian noise to weights
+            # Gaussian Noise Attack: Add random noise to model weights
+            # This degrades model performance gradually without obvious detection
             noise_coef = np.random.normal(0, self.attack_intensity, weights['coef'].shape)
             noise_intercept = np.random.normal(0, self.attack_intensity, weights['intercept'].shape)
             
@@ -146,7 +290,8 @@ class FedLearningNode:
             }
             
         elif self.attack_type == 'sign_flip':
-            # Sign flipping attack
+            # Sign Flipping Attack: Invert all weight signs
+            # This pushes the model away from convergence
             return {
                 'coef': -weights['coef'],
                 'intercept': -weights['intercept']
@@ -155,14 +300,34 @@ class FedLearningNode:
         return weights
     
     def train_local(self, global_weights=None, epochs=1):
-        """Train local model with potential attacks"""
+        """
+        Train local model on node's private data.
+        
+        This method performs local training, which is the core of federated
+        learning. Each node trains on its local data without sharing raw data.
+        
+        Args:
+            global_weights: Global model weights to initialize from (if any)
+            epochs: Number of local training epochs
+            
+        Returns:
+            Dictionary containing trained model weights ('coef', 'intercept')
+            
+        Process:
+            1. Initialize local model with global weights (if provided)
+            2. Apply label flipping attack (if malicious)
+            3. Train for specified epochs using partial_fit
+            4. Apply weight-based attacks (noise, sign flip)
+            5. Return (potentially attacked) model weights
+        """
         if global_weights is not None:
             self.model.coef_ = global_weights['coef'].copy()
             self.model.intercept_ = global_weights['intercept'].copy()
         
-        # Apply label flipping attack if malicious
+        # Apply label flipping attack if this is a malicious node
         y_train = self.y_train.copy()
         if self.is_malicious and self.attack_type == 'label_flip':
+            # Randomly flip a portion of labels (0 -> 1, 1 -> 0)
             flip_indices = np.random.choice(
                 len(y_train), 
                 int(len(y_train) * self.attack_intensity), 
@@ -170,6 +335,7 @@ class FedLearningNode:
             )
             y_train[flip_indices] = 1 - y_train[flip_indices]
         
+        # Local training loop
         for _ in range(epochs):
             self.model.partial_fit(self.X_train, y_train, classes=np.array([0, 1]))
         
@@ -178,29 +344,57 @@ class FedLearningNode:
             'intercept': self.model.intercept_.copy()
         }
         
-        # Apply weight-based attacks and persist them to the node model
+        # Apply weight-based attacks (gaussian_noise, sign_flip) and persist to model
         attacked = self.apply_attack(weights)
         self.model.coef_ = attacked['coef'].copy()
         self.model.intercept_ = attacked['intercept'].copy()
         return attacked
     
     def compute_shap(self, n_samples=10):
-        """Compute SHAP values for explainability"""
+        """
+        Compute SHAP values for model explainability.
+        
+        SHAP (SHapley Additive exPlanations) values quantify each feature's
+        contribution to model predictions. This is the core of PoEx consensus.
+        
+        Args:
+            n_samples: Number of samples to use for SHAP computation
+            
+        Returns:
+            numpy array of mean absolute SHAP values (feature importance)
+            
+        Note:
+            - Uses KernelExplainer which is model-agnostic
+            - Returns importance for positive class predictions
+            - Mean absolute values provide feature importance ranking
+        """
         sample_idx = np.random.choice(len(self.X_train), min(n_samples, len(self.X_train)), replace=False)
         X_sample = self.X_train[sample_idx]
         
+        # Create SHAP explainer using model's predict_proba method
         explainer = shap.KernelExplainer(self.model.predict_proba, X_sample)
         shap_values = explainer.shap_values(X_sample)
         
+        # Handle different SHAP output formats
         if isinstance(shap_values, list):
-            shap_values = shap_values[1]
+            shap_values = shap_values[1]  # Take positive class
         elif len(shap_values.shape) == 3:
-            shap_values = shap_values[:, :, 1]
+            shap_values = shap_values[:, :, 1]  # Take positive class slice
         
+        # Return mean absolute SHAP values across samples
         return np.mean(np.abs(shap_values), axis=0)
     
     def evaluate(self, X=None, y=None):
-        """Evaluate model performance"""
+        """
+        Evaluate model performance on test data.
+        
+        Args:
+            X: Features to evaluate on (defaults to local test set)
+            y: Labels to evaluate against (defaults to local test labels)
+            
+        Returns:
+            Dictionary with metrics: accuracy, precision, recall, f1
+        """
         if X is None:
             X, y = self.X_test, self.y_test
         

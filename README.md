@@ -1,43 +1,61 @@
-# FedXChain: Federated Explainable Blockchain
+# FedXChain: Proof of Explanation (PoEx) Consensus for Byzantine-Robust Federated Learning
 
-Implementation of the FedXChain framework as described in the ETASR paper "FedXChain: Federated Explainable Blockchain with Node-Specific Adaptive Trust".
+Implementation of the FedXChain framework as described in the IEEE Access paper:
+
+> **"FedXChain: Proof of Explanation (PoEx) Consensus for Byzantine-Robust Federated Learning Using SHAP-Based Model Validation on Blockchain"**
+>
+> Rachmad Andri Atmoko, Sholeh Hadi Pramono, M. Fauzan Edy Purnomo, Panca Mudjirahardjo, Mahdin Rohmatillah, and Cries Avian
+>
+> IEEE Access, 2025
+
+---
+
+## Reproducibility Statement
+
+This repository provides all necessary code, configurations, and documentation to reproduce the experimental results presented in the paper. Key reproducibility features:
+
+- **Fixed random seeds** for deterministic results
+- **Docker containerization** for consistent environment
+- **Comprehensive configuration files** documenting all hyperparameters
+- **Automated experiment scripts** with logging
+
+**GitHub Repository**: [https://github.com/vokasitibrawijaya/Proof-Explanation-PoEx-](https://github.com/vokasitibrawijaya/Proof-Explanation-PoEx-)
+
+---
 
 ## Overview
 
 FedXChain addresses three key challenges in federated learning:
-1. **Explainability**: Privacy-preserving SHAP aggregation for model interpretability
-2. **Trust**: Adaptive trust-based aggregation using Node-Specific Divergence Scores (NSDS)
-3. **Auditability**: Blockchain-verified audit trails for transparent model aggregation
+1. **Byzantine-Robust Aggregation**: Defense against malicious clients using SHAP-based validation
+2. **Explainability**: NSDS (Normalized Symmetric Divergence Score) for interpretable anomaly detection
+3. **Auditability**: Hyperledger Fabric blockchain for immutable audit trails
 
-## Features
+## Key Contributions
 
-- **Federated-SHAP Aggregation**: Privacy-preserving feature importance synthesis
-- **Node-Specific Divergence Scores (NSDS)**: Quantify local explanation fidelity
-- **Adaptive Trust-Based Aggregation**: Dynamic weighting based on accuracy, explainability, and consistency
-- **Blockchain Integration**: Immutable logging of model updates and aggregation decisions
-- **Non-IID Data Support**: Dirichlet-based label skew for realistic heterogeneous scenarios
+- **Proof of Explanation (PoEx)**: Novel consensus mechanism using SHAP values
+- **NSDS Metric**: Quantifies explanation divergence using Jensen-Shannon divergence
+- **Comprehensive Evaluation**: 8 aggregation methods, 4 attack types, IID/Non-IID scenarios
 
 ## Directory Structure
 
 ```
-fedXchain-etasr/
-├── configs/
-│   └── experiment_config.yaml    # Experiment configuration
-├── scripts/
-│   └── run_fedxchain.py         # Main experiment implementation
-├── hardhat/                      # Blockchain smart contracts (optional)
-│   ├── contracts/
-│   │   └── FedXChain.sol        # FedXChain smart contract
-│   ├── scripts/
-│   │   └── deploy.js            # Deployment script
-│   └── hardhat.config.js        # Hardhat configuration
+consensus_flblockchain/
+├── configs/                      # Experiment configurations
+│   ├── ieee_experiment_config.yaml   # Main experiment config
+│   └── experiment_config.yaml        # Basic config
+├── scripts/                      # Python experiment scripts
+│   ├── run_ieee_experiment.py        # Main IEEE experiment
+│   ├── run_cifar10_cnn_experiment.py # CIFAR-10 CNN experiment
+│   └── visualize_results.py          # Result visualization
+├── hardhat/                      # Ethereum smart contracts
+│   ├── contracts/FedXChain.sol       # PoEx smart contract
+│   └── scripts/deploy.js             # Deployment script
+├── hlf/                          # Hyperledger Fabric chaincode
+│   └── chaincode/poex/               # PoEx chaincode (Go)
 ├── results/                      # Experiment results (generated)
-├── logs/                         # Logs (generated)
 ├── requirements.txt              # Python dependencies
-├── Dockerfile                    # Docker container definition
-├── docker-compose.yml            # Docker Compose setup
-├── setup.sh                      # Setup script
-├── run_experiment.sh             # Run experiment (simple mode)
+├── Dockerfile                    # Docker container
+├── docker-compose.yml            # Multi-container setup
 └── README.md                     # This file
 ```
 
@@ -165,14 +183,6 @@ Optional (for blockchain):
 - Hardhat
 - Foundry (for Docker mode)
 
-## Paper Reference
-
-```
-Atmoko, R. A., Rohmatillah, M., Avian, C., Pramono, S. H., Purnomo, F. E., & Mudjirahardjo, P.
-FedXChain: Federated Explainable Blockchain with Node-Specific Adaptive Trust.
-Engineering, Technology & Applied Science Research.
-```
-
 ## Comparison with Baselines
 
 FedXChain demonstrates:
@@ -201,10 +211,27 @@ pip install -r requirements.txt
 # Edit configs/experiment_config.yaml
 ```
 
+## Citation
+
+If you use this code in your research, please cite:
+
+```bibtex
+@article{atmoko2025fedxchain,
+  title={FedXChain: Proof of Explanation (PoEx) Consensus for Byzantine-Robust Federated Learning Using SHAP-Based Model Validation on Blockchain},
+  author={Atmoko, Rachmad Andri and Pramono, Sholeh Hadi and Purnomo, M. Fauzan Edy and Mudjirahardjo, Panca and Rohmatillah, Mahdin and Avian, Cries},
+  journal={IEEE Access},
+  year={2025},
+  publisher={IEEE},
+  doi={10.1109/ACCESS.2025.XXXXXXX}
+}
+```
+
 ## License
 
-This implementation is provided for research and educational purposes.
+This implementation is provided for research and educational purposes under the MIT License.
 
 ## Contact
 
-For questions about the implementation, please refer to the original paper.
+- **Corresponding Author**: Sholeh Hadi Pramono (sholehpramono@ub.ac.id)
+- **Institution**: Electrical Engineering Department, Universitas Brawijaya, Malang, Indonesia
+- **GitHub**: [https://github.com/vokasitibrawijaya/Proof-Explanation-PoEx-](https://github.com/vokasitibrawijaya/Proof-Explanation-PoEx-)

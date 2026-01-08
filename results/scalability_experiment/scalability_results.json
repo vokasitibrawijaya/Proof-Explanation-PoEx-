@@ -1,0 +1,48 @@
+{
+  "experiment": "Scalability Experiment",
+  "date": "2026-01-05 14:53:09",
+  "config": {
+    "client_counts": [
+      20,
+      50,
+      100
+    ],
+    "byzantine_fraction": 0.3,
+    "n_rounds": 3
+  },
+  "results": [
+    {
+      "n_clients": 20,
+      "avg_shap_time_per_client": 6.0280164082845054e-05,
+      "std_shap_time_per_client": 5.5648681692252836e-06,
+      "nsds_computation_ms": 0.3822644551595052,
+      "krum_aggregation_ms": 0.8579889933268229,
+      "trimmedmean_aggregation_ms": 0.06961822509765625,
+      "poex_aggregation_ms": 0.02582867940266927,
+      "total_round_time_poex": 0.0016136964162190754,
+      "total_round_time_krum": 0.002063592274983724
+    },
+    {
+      "n_clients": 50,
+      "avg_shap_time_per_client": 6.345431009928386e-05,
+      "std_shap_time_per_client": 2.2307192239978426e-06,
+      "nsds_computation_ms": 0.8991559346516927,
+      "krum_aggregation_ms": 4.423062006632487,
+      "trimmedmean_aggregation_ms": 0.12962023417154947,
+      "poex_aggregation_ms": 0.037670135498046875,
+      "total_round_time_poex": 0.004109541575113933,
+      "total_round_time_krum": 0.00759577751159668
+    },
+    {
+      "n_clients": 100,
+      "avg_shap_time_per_client": 5.949576695760091e-05,
+      "std_shap_time_per_client": 4.257092788769844e-06,
+      "nsds_computation_ms": 1.8874009450276692,
+      "krum_aggregation_ms": 17.010847727457683,
+      "trimmedmean_aggregation_ms": 0.2952416737874349,
+      "poex_aggregation_ms": 0.07541974385579427,
+      "total_round_time_poex": 0.007912397384643555,
+      "total_round_time_krum": 0.022960424423217773
+    }
+  ]
+}

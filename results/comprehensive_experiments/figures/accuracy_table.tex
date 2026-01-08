@@ -1,0 +1,17 @@
+
+\begin{table}[h]
+\centering
+\caption{Accuracy Comparison Under Byzantine Attacks (10 Clients, 30\% Byzantine)}
+\label{tab:accuracy_comparison}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Method} & \textbf{Sign Flip} & \textbf{Label Flip} & \textbf{Gaussian Noise} & \textbf{Average} \\
+\midrule
+FedAvg & 0.9737 & 0.9737 & \textbf{0.9825} & 0.9766 \\
+Krum & 0.9649 & 0.9649 & 0.9649 & 0.9649 \\
+MultiKrum & \textbf{0.9825} & \textbf{0.9825} & \textbf{0.9825} & 0.9825 \\
+TrimmedMean & 0.9035 & 0.9035 & 0.9211 & 0.9094 \\
+PoEx & 0.9737 & 0.9737 & \textbf{0.9825} & 0.9766 \\
+\bottomrule
+\end{tabular}
+\end{table}

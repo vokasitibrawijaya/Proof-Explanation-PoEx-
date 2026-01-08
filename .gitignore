@@ -1,0 +1,85 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# LaTeX auxiliary files
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+
+# RTF conversion temp files
+*_preprocessed.*
+poex_v*.tex
+poex_v*.rtf
+poex_v*.pdf
+poex_direct.*
+paper_convert.*
+poex_processed*
+preprocess_latex_v*.py
+
+# Office temp files
+~$*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Large files
+*.pth
+*.h5
+*.pkl
+
+# Data files (large datasets)
+data/
+*.tar.gz
+
+# Logs
+logs/
+*.log
+
+# Node modules (for hardhat)
+node_modules/
+
+# Results (keep structure, may exclude large files)
+# results/
+
+# Temporary files
+*.tmp
+*.temp

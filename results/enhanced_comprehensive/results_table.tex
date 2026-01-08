@@ -1,0 +1,46 @@
+
+\begin{table*}[t]
+\centering
+\caption{Comprehensive Accuracy Comparison with 95\% Confidence Intervals (10 Clients, 30\% Byzantine)}
+\label{tab:comprehensive_results}
+\begin{tabular}{llccc}
+\toprule
+\textbf{Method} & \textbf{Attack} & \textbf{Accuracy} & \textbf{95\% CI} & \textbf{Byz. Bound} \\
+\midrule
+FedAvg & Sign Flip & 0.9737 & [0.9737, 0.9737] & 0.00 \\
+FedAvg & Label Flip & 0.9737 & [0.9737, 0.9737] & 0.00 \\
+FedAvg & Gaussian Noise & 0.9561 & [0.9638, 0.9713] & 0.00 \\
+Krum & Sign Flip & 0.9649 & [0.9649, 0.9649] & 0.35 \\
+Krum & Label Flip & 0.9649 & [0.9649, 0.9649] & 0.35 \\
+Krum & Gaussian Noise & 0.9649 & [0.9649, 0.9649] & 0.35 \\
+MultiKrum & Sign Flip & 0.9825 & [0.9825, 0.9825] & 0.35 \\
+MultiKrum & Label Flip & 0.9825 & [0.9825, 0.9825] & 0.35 \\
+MultiKrum & Gaussian Noise & 0.9825 & [0.9825, 0.9825] & 0.35 \\
+TrimmedMean & Sign Flip & 0.9737 & [0.9737, 0.9737] & 0.45 \\
+TrimmedMean & Label Flip & 0.9737 & [0.9737, 0.9737] & 0.45 \\
+TrimmedMean & Gaussian Noise & 0.9737 & [0.9691, 0.9730] & 0.45 \\
+Bulyan & Sign Flip & 0.9737 & [0.9737, 0.9737] & 0.17 \\
+Bulyan & Label Flip & 0.9737 & [0.9737, 0.9737] & 0.17 \\
+Bulyan & Gaussian Noise & 0.9737 & [0.9737, 0.9737] & 0.17 \\
+FLTrust & Sign Flip & 0.9825 & [0.9825, 0.9825] & 0.50 \\
+FLTrust & Label Flip & 0.9825 & [0.9825, 0.9825] & 0.50 \\
+FLTrust & Gaussian Noise & 0.9825 & [0.9802, 0.9824] & 0.50 \\
+FLAME & Sign Flip & 0.9825 & [0.9825, 0.9825] & 0.40 \\
+FLAME & Label Flip & 0.9825 & [0.9825, 0.9825] & 0.40 \\
+FLAME & Gaussian Noise & 0.9474 & [0.9715, 0.9788] & 0.40 \\
+PoEx & Sign Flip & 0.9737 & [0.9737, 0.9737] & 0.45 \\
+PoEx & Label Flip & 0.9737 & [0.9737, 0.9737] & 0.45 \\
+PoEx & Gaussian Noise & 0.9561 & [0.9590, 0.9668] & 0.45 \\
+PoEx & Sign Flip & 0.9737 & [0.9737, 0.9737] & 0.45 \\
+PoEx & Sign Flip & 0.9737 & [0.9737, 0.9737] & 0.45 \\
+PoEx & Sign Flip & 0.9737 & [0.9737, 0.9737] & 0.45 \\
+PoEx & Sign Flip & 0.9737 & [0.9737, 0.9737] & 0.45 \\
+PoEx & Sign Flip & 0.9737 & [0.9737, 0.9737] & 0.45 \\
+PoEx & Sign Flip & 0.9825 & [0.9825, 0.9825] & 0.45 \\
+PoEx & Sign Flip & 0.9649 & [0.9649, 0.9649] & 0.45 \\
+PoEx & Sign Flip & 0.9737 & [0.9737, 0.9737] & 0.45 \\
+PoEx & Sign Flip & 0.9561 & [0.9561, 0.9561] & 0.45 \\
+
+\bottomrule
+\end{tabular}
+\end{table*}

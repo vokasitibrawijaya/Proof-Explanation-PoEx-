@@ -1,0 +1,21 @@
+{
+  "experiment": "CIFAR-10 CNN Non-IID",
+  "n_clients": 20,
+  "n_rounds": 10,
+  "n_seeds": 3,
+  "byzantine_fraction": 0.3,
+  "honest_mean": 0.17836225775816916,
+  "honest_std": 0.056874620006532296,
+  "honest_median": 0.17901563187161543,
+  "byzantine_mean": 0.5942215626500609,
+  "byzantine_std": 0.10703056447317562,
+  "byzantine_median": 0.5933923135858566,
+  "separation": 0.4158593048918917,
+  "mann_whitney_u": 0.0,
+  "pvalue": 7.278249890452282e-43,
+  "significant": true,
+  "optimal_threshold": 0.4,
+  "optimal_tpr": 0.9777777777777777,
+  "optimal_fpr": 0.0,
+  "optimal_f1": 0.9887640449438202
+}
